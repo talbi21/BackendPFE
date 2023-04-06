@@ -38,9 +38,13 @@ const storage = multer.diskStorage({
     if (!isPasswordCorrect) {
       return res.status(401).json({ message: 'Invalid identifiant or password' });
     }
-  
-    const token = user.generateToken();
-    res.json({ token });
+
+    isFirstConnect = user.firstConnect;
+    if (isFirstConnect) {
+      return res.json({ user });
+    }else
+    token = user.generateToken();
+    res.json({ user,token });
   });
 
   router.post('/signup', async (req, res) => {
@@ -63,6 +67,33 @@ const storage = multer.diskStorage({
       // Return the new user and token
       res.status(201).json({ user, token });
     } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+
+  router.post('/updatePassword/:id', async (req, res) => {
+    try {
+    const oldPassword = req.body.oldPassword;
+    const newPassword = req.body.newPassword;
+
+    const user = await User.findById(req.params.id);
+    
+    const isPasswordCorrect = await user.comparePassword(oldPassword);
+
+    if (!isPasswordCorrect) {
+      return res.status(401).json({ message: 'Invalid  password' });
+    }
+
+    user.password = newPassword;
+    user.firstConnect = false;
+    await user.save();
+
+    const token = user.generateToken();
+    res.json({ user,token });
+
+
+  }catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Server error' });
     }

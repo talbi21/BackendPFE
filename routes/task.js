@@ -1,5 +1,5 @@
 const router = require('express').Router();
-let User = require('../models/task');
+let Task = require('../models/task');
 
 router.get('/tasks', (req, res) => {
     Task.find()
@@ -7,7 +7,7 @@ router.get('/tasks', (req, res) => {
       .catch(err => res.status(500).json({ error: err }));
   });
   
-  router.post('/tasks', (req, res) => {
+  router.post('/add', (req, res) => {
     const { title, date, description, status, type } = req.body;
     const newTask = new Task({ title, date, description, status, type });
     newTask.save()

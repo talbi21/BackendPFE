@@ -9,7 +9,7 @@ const taskSchema = new mongoose.Schema({
   description: { type: String, required: true },
   status: { type: String, enum: statusOptions, required: true },
   type: { type: String, enum: typeOptions, required: true },
-});
+}, { timestamps: true });
 
 const Task = mongoose.model('Task', taskSchema);
 

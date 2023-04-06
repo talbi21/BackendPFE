@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
-const router = express.Router(); // utilisez express.Router() pour créer un routeur
+const router = express.Router(); 
 const clientPassport = require ("passport");
 const config =  require('config');
 const dbConfig = config.get('db.dbConfig.dbName');
@@ -27,9 +27,11 @@ mongoose.connect(dbConfig, {
 app.use(clientPassport.initialize());
 
 const UserRouter = require('./routes/User');
-router.use('/User', UserRouter); // utilisez router.use() pour définir les routes
+const TaskRouter = require('./routes/task');
+router.use('/Task', TaskRouter);
+router.use('/User', UserRouter); 
 
-app.use('', router); // utilisez app.use() pour monter le routeur sur l'application
+app.use('', router); 
 
 app.listen(dbConfigPORT, () => {
   console.log("App is running on port  " + dbConfigPORT);
