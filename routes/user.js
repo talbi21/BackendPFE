@@ -1,6 +1,44 @@
 const router = require('express').Router();
 let User = require('../models/User');
 const multer = require('multer');
+const otpGenerator = require('otp-generator');
+const twilio = require('twilio');
+const config =  require('config');
+const accountSidConfig = config.get('twilio.twilioConfig.accountSid');
+const authTokenConfig = config.get('twilio.twilioConfig.authToken');
+const twilioPhoneNumberConfig = config.get('twilio.twilioConfig.twilioPhoneNumber');
+// Twilio credentials
+const accountSid = accountSidConfig; // Replace with your Twilio account SID
+const authToken = authTokenConfig; // Replace with your Twilio auth token
+const twilioPhoneNumber = twilioPhoneNumberConfig; // Replace with your Twilio phone number
+
+const client = twilio(accountSid, authToken);
+
+// Function to send OTP via SMS
+function sendOtpToPhoneNumber(phoneNumber, otp) {
+  const message = `Your OTP is: ${otp}`; // Message to send
+
+  // Send SMS using Twilio
+  client.messages.create({
+    body: message,
+    from: twilioPhoneNumber,
+    to: phoneNumber
+  })
+  .then(message => console.log(`OTP sent to ${phoneNumber}: ${message.sid}`))
+  .catch(error => console.error(`Failed to send OTP to ${phoneNumber}: ${error.message}`));
+}
+
+router.post('/otp', (req, res) => {
+  // Generate OTP
+  const otp = otpGenerator.generate(4, { digits: true, alphabets: false, specialChars: false,lowerCaseAlphabets: false,upperCaseAlphabets:false });
+
+  // Send OTP to user's phone number via SMS
+  const phoneNumber = req.body.phoneNumber; // Get phone number from request body
+  sendOtpToPhoneNumber(phoneNumber, otp);
+
+  res.status(200).json({ message: 'OTP sent successfully!' });
+});
+
 
 const validateLoginUserInput = require("../validation/login_user");
 
@@ -74,8 +112,8 @@ const storage = multer.diskStorage({
 
   router.post('/updatePassword/:id', async (req, res) => {
     try {
-    const oldPassword = req.body.oldPassword;
-    const newPassword = req.body.newPassword;
+
+    const { oldPassword, newPassword} = req.body;
 
     const user = await User.findById(req.params.id);
     
