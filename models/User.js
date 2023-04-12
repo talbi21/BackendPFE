@@ -10,13 +10,13 @@ const userSchema = new Schema({
     type: String
   },
   identifiant: {
-    type: String, required: true, trim: true, minlength: 3
+    type: String, required: true, trim: true, minlength: 3,unique: true,
   },
   password: {
     type: String, required: true, unique: false, trim: true, minlength: 3
   },
   phoneNumber: {
-    type: String
+    type: String,unique: true,
   },
   image: {
     type: String

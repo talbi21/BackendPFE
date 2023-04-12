@@ -1,5 +1,6 @@
 const router = require('express').Router();
 let User = require('../models/User');
+let Otp = require('../models/Otp');
 const multer = require('multer');
 const otpGenerator = require('otp-generator');
 const twilio = require('twilio');
@@ -28,16 +29,57 @@ function sendOtpToPhoneNumber(phoneNumber, otp) {
   .catch(error => console.error(`Failed to send OTP to ${phoneNumber}: ${error.message}`));
 }
 
-router.post('/otp', (req, res) => {
+router.post('/sendOtp', async (req, res) => {
+  const {phoneNumber} = req.body;
+
+  const user = await User.findOne({ phoneNumber });
+  
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }else{
+      const otp = otpGenerator.generate(4, { digits: true, alphabets: false, specialChars: false,lowerCaseAlphabets: false,upperCaseAlphabets:false });
+  
+      const otps = new Otp({ phoneNumber,otp });
+          await otps.save();
+          
+    
+      // Send OTP to user's phone number via SMS
+      sendOtpToPhoneNumber(phoneNumber, otp);
+    
+      res.status(200).json({ message: 'OTP sent successfully!' });
+    }
   // Generate OTP
-  const otp = otpGenerator.generate(4, { digits: true, alphabets: false, specialChars: false,lowerCaseAlphabets: false,upperCaseAlphabets:false });
-
-  // Send OTP to user's phone number via SMS
-  const phoneNumber = req.body.phoneNumber; // Get phone number from request body
-  sendOtpToPhoneNumber(phoneNumber, otp);
-
-  res.status(200).json({ message: 'OTP sent successfully!' });
+ 
 });
+
+router.get('/VerifOtp', async (req, res) => {
+  const {phoneNumber,otp} = req.body;
+
+  try {
+    let otpDoc;
+
+    otpDoc = await Otp.findOneAndDelete({ phoneNumber, otp }).exec();
+
+
+    if (otpDoc) {
+      // OTP is valid
+      return res.status(200).json({ message: 'OTP verified successfully' });
+    } else {
+      return res.status(400).json({ message: 'Invalid OTP' });
+    }
+  } catch (err) {
+    console.error('Failed to verify OTP:', err);
+    return res.status(500).json({ message: 'Failed to verify OTP' });
+  }
+ 
+});
+
+router.route('/').get((req, res) => {
+  User.find()
+    .then(User => res.status(200).json(User))
+    .catch(err => res.status(500).json('Error: ' + err));
+});
+
 
 
 const validateLoginUserInput = require("../validation/login_user");
