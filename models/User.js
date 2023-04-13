@@ -23,10 +23,7 @@ const userSchema = new Schema({
   },
   firstConnect: {
     type:Boolean,default:true,
-  }
-
-
-}, { timestamps: true })
+  }}, { timestamps: true })
 
 userSchema.methods.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
@@ -49,7 +46,6 @@ userSchema.pre('save', async function (next) {
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
-
 
 const User = mongoose.model('User', userSchema);
 module.exports = User;
