@@ -46,15 +46,15 @@ router.post('/sendOtp', async (req, res) => {
       // Send OTP to user's phone number via SMS
       sendOtpToPhoneNumber(phoneNumber, otp);
     
-      res.status(200).json({ message: 'OTP sent successfully!' });
+      res.status(200).json({ message: 'OTP sent successfully!'});
     }
   // Generate OTP
  
 });
 
-router.get('/VerifOtp', async (req, res) => {
+router.post('/VerifOtp', async (req, res) => {
   const {phoneNumber,otp} = req.body;
-
+console.log(req.body);
   try {
     let otpDoc;
 
@@ -98,6 +98,7 @@ const storage = multer.diskStorage({
   router.post('/login', async (req, res) => {
 
       // Form validation
+      console.log('Request Body:', req.body);
   const { errors, isValid } = validateLoginUserInput(req.body);
   // Check validation
   if (!isValid) {
@@ -106,6 +107,7 @@ const storage = multer.diskStorage({
 
     const { identifiant, password } = req.body;
   
+    
 
     const user = await User.findOne({ identifiant });
   
