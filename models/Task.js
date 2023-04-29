@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const statusOptions = ['In progress', 'To do', 'Done'];
+const statusOptions = ['In Progress', 'To do', 'Done'];
 const typeOptions = ['Feature', 'Issue'];
 
 const taskSchema = new mongoose.Schema({
