@@ -50,4 +50,22 @@ router.get('/tasks', (req, res) => {
     }
   });
 
+  router.post('/update/:taskId', async (req, res) => {
+    try {
+
+      const taskId = req.params.taskId;
+      const task = await Task.findById(taskId);
+
+      if(task.status ="To do"){
+        const updatedTask = await Task.findByIdAndUpdate(taskId, { status: 'In Progress' }, { new: true });
+        res.json(updatedTask);
+      }
+
+      
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server Error');
+    }
+  });
+
   module.exports = router;
