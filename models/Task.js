@@ -9,7 +9,12 @@ const taskSchema = new mongoose.Schema({
   description: { type: String, required: true },
   status: { type: String, enum: statusOptions, required: true },
   type: { type: String, enum: typeOptions, required: true },
-  collaborators: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], required: true }
+  collaborators: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], required: true },
+  attachment: {
+    data: Buffer,
+    contentType: String
+  },
+  isArchived: { type: Boolean, default: false } 
 }, { timestamps: true });
 const Task = mongoose.model('Task', taskSchema);
 
