@@ -15,6 +15,16 @@ const twilioPhoneNumber = twilioPhoneNumberConfig; // Replace with your Twilio p
 
 const client = twilio(accountSid, authToken);
 
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + file.originalname);
+  }
+});
+var upload = multer({ storage: storage });
+
 // Function to send OTP via SMS
 function sendOtpToPhoneNumber(phoneNumber, otp) {
   const message = `Your OTP is: ${otp}`; // Message to send
@@ -28,6 +38,8 @@ function sendOtpToPhoneNumber(phoneNumber, otp) {
   .then(message => console.log(`OTP sent to ${phoneNumber}: ${message.sid}`))
   .catch(error => console.error(`Failed to send OTP to ${phoneNumber}: ${error.message}`));
 }
+
+
 
 router.post('/sendOtp', async (req, res) => {
   const {phoneNumber} = req.body;
@@ -84,15 +96,7 @@ router.route('/').get((req, res) => {
 
 const validateLoginUserInput = require("../validation/login_user");
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, './uploads/');
-    },
-    filename: function (req, file, cb) {
-      cb(null, Date.now() + file.originalname);
-    }
-  });
-  var upload = multer({ storage: storage });
+
 
 
   router.post('/login', async (req, res) => {
@@ -129,10 +133,38 @@ const storage = multer.diskStorage({
     res.json({ user,token });
   });
 
+
+  router.post('/loginPhone', async (req, res) => {
+
+    // Form validation
+    console.log('Request Body:', req.body);
+
+
+  const { phoneNumber, phonePassword } = req.body;
+
+  
+
+  const user = await User.findOne({ phoneNumber });
+
+  if (!user) {
+    return res.status(401).json({ message: 'Invalid identifiant or password' });
+  }
+
+  const isPasswordCorrect = await user.comparePhonePassword(phonePassword);
+
+  if (!isPasswordCorrect) {
+    return res.status(401).json({ message: 'Invalid identifiant or password' });
+  }
+
+  
+ 
+  token = user.generateToken();
+  res.json({ user,token });
+});
+
   router.post('/signup', async (req, res) => {
     try {
-      const { userName, identifiant, password, phoneNumber, image } = req.body;
-  
+      const { userName, identifiant, password, phoneNumber, image, phonePassword } = req.body;
       // Check if the identifiant already exists
       const existingUser = await User.findOne({ identifiant });
       if (existingUser) {
@@ -140,7 +172,7 @@ const storage = multer.diskStorage({
       }
   
       // Create a new user
-      const user = new User({ userName, identifiant, password, phoneNumber, image });
+      const user = new User({ userName, identifiant, password, phoneNumber, image, phonePassword });
       await user.save();
   
       // Generate token
