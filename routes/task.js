@@ -1,6 +1,7 @@
 const router = require('express').Router();
 let Task = require('../models/Task');
 const multer = require('multer');
+const path = require('path');
 const fs = require('fs');
 
 
@@ -118,27 +119,32 @@ router.get('/tasks', (req, res) => {
   });
 
   // Download attachment
+// Download attachment
 router.get('/downloadAttachment/:taskId', async (req, res) => {
   try {
     const taskId = req.params.taskId;
     const task = await Task.findById(taskId);
 
-    if (!task || !task.attachment) {
+    console.log(task.attachment.path+"p");
+
+    if (!task || !task.attachment || !task.attachment.path) {
       return res.status(404).json({ error: 'Attachment not found' });
     }
 
-    const attachment = task.attachment;
-    const { data, contentType, originalName } = attachment;
+    const attachmentFilePath = task.attachment.path;
+    const fileName = task.attachment.originalName;
+    const filePath = path.resolve(attachmentFilePath);
+//const resolvedPath = path.resolve(attachmentFilePath);
+    res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
+    res.setHeader('Content-Type', task.attachment.contentType);
 
-    res.set('Content-Type', contentType);
-    res.set('Content-Disposition', `attachment; filename=${originalName}`);
-
-    res.send(data);
+    res.sendFile(filePath);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
 });
+
 
 // Upload and update task with attachment
 router.post('/fix/:taskId', upload.single('file'), async (req, res) => {
@@ -151,7 +157,10 @@ router.post('/fix/:taskId', upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'No file selected' });
     }
 
+
     const fileData = await fs.promises.readFile(file.path);
+    console.log(file.originalname+"at");
+    console.log(file.path+"p");
 
     const attachmentFile = {
       data: fileData,

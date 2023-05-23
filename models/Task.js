@@ -12,7 +12,9 @@ const taskSchema = new mongoose.Schema({
   collaborators: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], required: true },
   attachment: {
     data: Buffer,
-    contentType: String
+    contentType: String,
+    originalName : String,
+    path : String
   },
   isArchived: { type: Boolean, default: false } 
 }, { timestamps: true });
