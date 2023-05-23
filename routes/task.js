@@ -149,6 +149,9 @@ router.get('/downloadAttachment/:taskId', async (req, res) => {
 // Upload and update task with attachment
 router.post('/fix/:taskId', upload.single('file'), async (req, res) => {
   try {
+    const { description } = req.body;
+    
+    
     const taskId = req.params.taskId;
     const task = await Task.findById(taskId);
     const file = req.file;
@@ -159,7 +162,6 @@ router.post('/fix/:taskId', upload.single('file'), async (req, res) => {
 
 
     const fileData = await fs.promises.readFile(file.path);
-    console.log(file.originalname+"at");
     console.log(file.path+"p");
 
     const attachmentFile = {
@@ -170,7 +172,7 @@ router.post('/fix/:taskId', upload.single('file'), async (req, res) => {
     };
 
     if (task.status === 'In Progress') {
-      const updatedTask = await Task.findByIdAndUpdate(taskId, { attachment :attachmentFile, status: 'Done' }, { new: true });
+      const updatedTask = await Task.findByIdAndUpdate(taskId, { attachment :attachmentFile, status: 'Done', description:description}, { new: true });
       res.json(updatedTask);
     } else {
       res.status(400).json({ error: 'Invalid task status' });
