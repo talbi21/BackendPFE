@@ -22,8 +22,8 @@ router.get('/tasks', (req, res) => {
   });
   
   router.post('/add', (req, res) => {
-    const { title, date, description, status, type, collaborators } = req.body;
-    const newTask = new Task({ title, date, description, status, type, collaborators });
+    const { title, date, description,  type, collaborators } = req.body;
+    const newTask = new Task({ title, date, description, type, collaborators });
     newTask.save()
       .then(task => res.json(task))
       .catch(err => res.status(500).json({ error: err }));

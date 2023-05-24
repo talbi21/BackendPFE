@@ -25,8 +25,10 @@ mongoose.connect(dbConfig, {
 });
 
 app.use(clientPassport.initialize());
+app.use(express.static('public'));
+app.use('/uploads', express.static('uploads'));
 
-const UserRouter = require('./routes/User');
+const UserRouter = require('./routes/user');
 const TaskRouter = require('./routes/task');
 router.use('/Task', TaskRouter);
 router.use('/User', UserRouter); 
