@@ -213,4 +213,40 @@ const validateLoginUserInput = require("../validation/login_user");
     }
   });
 
+
+  router.put('/Update/:id',async (req, res) => {
+    const { id } = req.params;
+    const { userName, identifiant,  oldPassword, newPassword, phoneNumber, phonePassword } = req.body;
+  
+    try {
+      const user = await User.findById(id);
+  
+      if (!user) {
+        return res.status(404).json({ message: 'Utilisateur non trouvé' });
+      }
+
+      const isPasswordCorrect = await user.comparePassword(oldPassword);
+
+    if (!isPasswordCorrect) {
+      return res.status(401).json({ message: 'Invalid  password' });
+    }
+
+      
+  
+      // Mettez à jour les champs nécessaires
+      user.userName = userName;
+      user.identifiant = identifiant;
+      user.password = newPassword;
+      user.phoneNumber = phoneNumber;
+      user.phonePassword = phonePassword;
+  
+      await user.save();
+  
+      res.status(200).json({ message: 'Utilisateur mis à jour avec succès', user });
+    } catch (error) {
+      res.status(500).json({ message: 'Une erreur est survenue lors de la mise à jour de l\'utilisateur', error });
+    }
+  });
+  
+
   module.exports = router;
