@@ -214,9 +214,11 @@ const validateLoginUserInput = require("../validation/login_user");
   });
 
 
-  router.put('/Update/:id',async (req, res) => {
+  router.put('/Update/:id',upload.single('image'),async (req, res) => {
     const { id } = req.params;
     const { userName, identifiant,  oldPassword, newPassword, phoneNumber, phonePassword } = req.body;
+    const file = req.file;
+
   
     try {
       const user = await User.findById(id);
@@ -239,6 +241,11 @@ const validateLoginUserInput = require("../validation/login_user");
       user.password = newPassword;
       user.phoneNumber = phoneNumber;
       user.phonePassword = phonePassword;
+
+      if (file) {
+        user.image = file.path
+
+      }
   
       await user.save();
   
